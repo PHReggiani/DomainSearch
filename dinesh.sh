@@ -5,7 +5,7 @@
 ### The project is designed to work with the technical specifications ###
 ### of my last company. Most of the searchs are made to work with the ###
 ### servernames they use, and may not work properly in other contexts ###
-### At the end of the script, it saves main logs on a mysql database  ###
+### At the end of the script, it saves main logs on a mysql database. ###
 ### All the IPs, server names and other address are hidden with fake  ###
 ### names and can be distinguished by the capital letters             ###
 
@@ -13,13 +13,14 @@
 function run(){
         ### Dates and some color grading stuff ###
         time_stamp=$(date +"%x%x")
-        read -p "Digite o domínio: " domain
+        read -p "Enter the domain: " domain
         txtblu=$(tput setf 1)
         txtgrn=$(tput setf 2)
         txtred=$(tput setf 4)
         txtpur=$(tput setf 5)
         txtylw=$(tput setf 6)
         txtwht=$(tput setf 7)
+        ### Cleaning the screen to keep it nice and organized ###
         if [[ $domain == clear ]]; then
                 clear
         ### This next parameter calls a python SMTP script, to automatize the ###
