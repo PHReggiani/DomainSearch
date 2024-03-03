@@ -27,11 +27,11 @@ function run(){
         ### proccess of sending emails to the clients during the troubleshoot ###
 	elif [[ $domain == mail ]]; then
 		python3 /home/ubuntu/scripts/SMTP.py        
-	elif [[ $domain == server_TYRION ]]; then
+	elif [[ $domain == TYRION ]]; then
                 ### To easily obtain the IP addressess of the main servers of the company, this parameter uses ###
                 ### the ping command to the server public address and grep the exact IP position of the string ### 
 		read -p "Nº: " server_num
-		TYRION_ip=$(host server_TYRION"$server_num".COMPANY.com.br | grep "has address" || echo -e "${txtred}TYRION didn't return IP / TYRION does not exit${txtwht}")
+		TYRION_ip=$(host TYRION"$server_num".COMPANY.com.br | grep "has address" || echo -e "${txtred}TYRION didn't return IP / TYRION does not exit${txtwht}")
 		TYRION_ip2=${TYRION_ip##*' '}
 		echo ""
 		echo -e "TYRION$TYRION_num has IP \e[1m${txtylw}$TYRION_ip2\e[0m${txtwht}"
@@ -79,10 +79,10 @@ function run(){
                         echo "${txtblu}-Responsável Técnico:${txtwht}"
                         echo "$whois_tech"
                 }
+                ### Checking if the domain exists is always a good deal ###
                 if [[ $check_ip == *"not found"* && $whois_general == *"No match"*  ]]; then
-                        ### Checking if the domain exists is always a good deal ###
                         echo "${txtred}!!!!Domain does not exist!!!!${txtwht}"
-			export stts="INEXISTENTE"
+			export stts="DOESNT_EXIST"
                 elif [[ $check_ip == *"not found"* ]]; then
                         echo "${txtylw}The domain $domain didn't return an IP address. Check if the server is active!"
                         echo ""
@@ -95,11 +95,11 @@ function run(){
                         fi
                         exec_data
                         echo ""
-                        echo "${txtblu}-Executando ping...${txtwht}"
-                        ping -c 3 $domain | grep avg || echo "${txtylw}Domínio não retornou pacotes"
+                        echo "${txtblu}-Running ping...${txtwht}"
+                        ping -c 3 $domain | grep avg || echo "${txtylw}Domain didn't return any packages"
                         echo "${txtwht}"
                         ### All the "export" variables will be used later in this code to save logs on a database ###
-                        export stts="CONGELADO"
+                        export stts="FROZEN"
                 else
                         ### This session is used to show the IP address, and also tells to the user in ###
                         ### wich server the domain is hosted, based on the main servers of the company ###
@@ -156,12 +156,14 @@ function run(){
                                 echo -e "\e[1m${txtred}${txt}\e[0m"
 				export txtsql="OUT"
                         fi
+                        ### DMARC was recently included since in the last few days google began to demmand it ###
                         echo "${txtblu}-DMARC:"
                         dmarc=$(nslookup -type=txt _dmarc.$domain | grep dmarc)
                         if [[ $dmarc == *"DMARC1" ]]; then
                                 echo "${txtwht}$dmarc"
                         fi
                         echo ""
+                        ### Basic ping test to check server health ###
                         echo "${txtgrn}-----Network testing-----${txtwht}"
                         echo "${txtblu}-Running ping...${txtwht}"
                         ping -w1 -c1 $domain | grep avg || echo "${txtylw}Domínio didn't return packets"
@@ -171,7 +173,7 @@ function run(){
 
                 ### This final session stores into my database the main results of the search. ###
                 ### Nowadays is only used for consulting and repairing in case of any troubles after DNS editions, ###
-                ### With time they can be helpful to build insights about the clients profiles and observed problems. ###
+                ### With time they can be helpful to provide insights about the clients characteristics and commom problems ###
 		mysql --defaults-file=/home/ubuntu/scripts/.my.cnf -D domain_search -e "INSERT INTO out_resume (domain, status, ip, server, ns, mx, txt, hour, date, user_login) VALUES ('$domain', '$stts', '$check_ip3', '$check_TYRION2', '$nssql', '$mxsql', '$txtsql', CURTIME(), CURDATE(), '$whodid')";
 		last_id=$(mysql --defaults-file=/home/ubuntu/scripts/.my.cnf -D domain_search -e "SELECT id FROM out_resume ORDER BY id DESC LIMIT 1";)
 		last_id2=${last_id:2}
